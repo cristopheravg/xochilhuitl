@@ -34,9 +34,9 @@
   - Material vario maqueta
 
   [PINES]:
-  - Trigger → 9
-  - Echo    → 10
-  - Servo   → 11
+  - Trigger → A1
+  - Echo    → A0
+  - Servo   → 3
 
   ============================================
 */
@@ -46,8 +46,8 @@
 Servo servomotor;
 
 // Pines ultrasónico
-const int pinTrigger = 9;
-const int pinEcho = 10;
+const int pinTrigger = A1;
+const int pinEcho = A0;
 
 // Variables de medición
 float duracionPulsoUltrasonico, distanciaMedida;
@@ -72,7 +72,7 @@ void setup() {
   pinMode(pinTrigger, OUTPUT);
   pinMode(pinEcho, INPUT);
   Serial.begin(9600);
-  servomotor.attach(11);
+  servomotor.attach(3);
   cerrarPluma();
 }
 
@@ -121,9 +121,9 @@ void loop() {
 
 // Funciones
 void abrirPluma() {
-  servomotor.write(90);
+  servomotor.write(0);
 }
 
 void cerrarPluma() {
-  servomotor.write(0);
+  servomotor.write(90);
 }
