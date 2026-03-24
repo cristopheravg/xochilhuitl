@@ -72,7 +72,8 @@ void setup() {
   pinMode(pinTrigger, OUTPUT);
   pinMode(pinEcho, INPUT);
   Serial.begin(9600);
-  servomotor.attach(3);
+
+  delay(2000);
   cerrarPluma();
 }
 
@@ -121,9 +122,15 @@ void loop() {
 
 // Funciones
 void abrirPluma() {
+  servomotor.attach(3);
   servomotor.write(0);
+  delay(700);
+  servomotor.detach();
 }
 
 void cerrarPluma() {
+  servomotor.attach(3);
   servomotor.write(90);
+  delay(700);
+  servomotor.detach();
 }
