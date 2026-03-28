@@ -1,4 +1,3 @@
-
 /*
  ############################################################
  ########### INSTITUCIÓN EDUCATIVA XOCHILHUITL ##############
@@ -13,6 +12,8 @@
   Sistema automático que controla una pluma vehicular mediante
   un sensor ultrasónico. Detecta objetos cercanos para abrir
   la pluma y la cierra después de un tiempo sin detección.
+  La interfaz visual muestra el estado mediante un gráfico
+  representativo en pantalla OLED.
 
   AUTOR:  Cristopher Avila Gallegos
   FECHA DE CREACIÓN:  19/03/2026
@@ -27,6 +28,7 @@
   - Se implementa un cooldown para evitar activaciones falsas.
   - El servo se activa solo cuando se mueve (attach/detach)
     para evitar vibraciones.
+  - La pantalla OLED muestra un dibujo del estado de la pluma.
 
   ----------------------------------------------------------
   [HARDWARE]:
@@ -67,7 +69,7 @@
 
   ----------------------------------------------------------
   [VERSIÓN]:
-  v1.1 - Control mejorado del servo (sin vibración)
+  v1.2 - Interfaz gráfica mejorada con iconos
   ==========================================================
 */
 
@@ -108,38 +110,34 @@ const int tiempoBloqueo = 2000;
 
 // Estado
 bool plumaAbierta = false;
+bool estadoAnterior = false;
 
 // Histéresis
 const int distanciaAbrir = 30;
 const int distanciaCerrar = 40;
-
-// Variables de texto OLED
-int16_t x1, y1;
-uint16_t w, h;
 
 // ==========================================================
 // SETUP
 // ==========================================================
 void setup() {
 
-  // Pines auxiliares
   pinMode(A2, OUTPUT);
   pinMode(A3, OUTPUT);
 
-  // Sensor ultrasónico
   pinMode(pinTrigger, OUTPUT);
   pinMode(pinEcho, INPUT);
 
   Serial.begin(9600);
 
-  // Inicialización pantalla
   display.begin(SSD1306_SWITCHCAPVCC);
   display.setRotation(2);
   display.clearDisplay();
-  delay(200);
+  display.display();
 
   // Estado inicial (cerrado)
   analogWrite(A3, 255);
+
+  actualizarPantalla();
 }
 
 // ==========================================================
@@ -184,13 +182,16 @@ void loop() {
   }
 
   // ----------- PANTALLA -----------
-  actualizarPantalla();
+  if (plumaAbierta != estadoAnterior) {
+    actualizarPantalla();
+    estadoAnterior = plumaAbierta;
+  }
 
   // ----------- MONITOR SERIAL -----------
   Serial.print("Distancia: ");
   Serial.println(distanciaMedida);
 
-  delay(100);
+  delay(120);
 }
 
 // ==========================================================
@@ -199,11 +200,9 @@ void loop() {
 
 void abrirPluma() {
 
-  // Indicadores
   analogWrite(A2, 255);
   analogWrite(A3, 0);
 
-  // Movimiento servo
   servomotor.attach(6);
   servomotor.write(0);
   delay(700);
@@ -212,50 +211,41 @@ void abrirPluma() {
 
 void cerrarPluma() {
 
-  // Indicadores
   analogWrite(A2, 0);
   analogWrite(A3, 255);
 
-  // Movimiento servo
   servomotor.attach(6);
   servomotor.write(90);
   delay(700);
   servomotor.detach();
 }
 
+// ==================== OLED ====================
+
+
 void actualizarPantalla() {
 
   display.clearDisplay();
-
-  // Título
-  display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
 
-  display.getTextBounds("Xochilhuitl", 0, 0, &x1, &y1, &w, &h);
-  display.setCursor((128 - w) / 2, 0);
-  display.println("Xochilhuitl");
+  // ===== TÍTULO =====
+  display.setTextSize(1);
+  display.setCursor(25, 5);
+  display.println("CONTROL ACCESO");
 
-  // Estado
+  // Línea separadora
+  display.drawLine(0, 18, 128, 18, SSD1306_WHITE);
+
+  // ===== ESTADO PRINCIPAL =====
   display.setTextSize(2);
 
   if (plumaAbierta) {
-    display.getTextBounds("ABIERTO", 0, 0, &x1, &y1, &w, &h);
-    display.setCursor((128 - w) / 2, 30);
+    display.setCursor(20, 30);
     display.println("ABIERTO");
   } else {
-    display.getTextBounds("CERRADO", 0, 0, &x1, &y1, &w, &h);
-    display.setCursor((128 - w) / 2, 30);
+    display.setCursor(15, 30);
     display.println("CERRADO");
   }
 
-  // Distancia
-  display.setTextSize(1);
-  String texto = "Dist: " + String(distanciaMedida, 1) + " cm";
-
-  display.getTextBounds(texto, 0, 0, &x1, &y1, &w, &h);
-  display.setCursor((128 - w) / 2, 54);
-  display.println(texto);
-
   display.display();
 }
-
