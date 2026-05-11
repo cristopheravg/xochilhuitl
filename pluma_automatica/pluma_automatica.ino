@@ -31,12 +31,17 @@
   - Arduino Uno
   - Sensor HC-SR04
   - Servomotor SG90
-  - Material vario maqueta
+  - Material para su maqueta
+  - Led 5mm rojo
+  - Led 5mm verde
 
   [PINES]:
   - Trigger → A1
   - Echo    → A0
   - Servo   → 3
+  - Led verde  → 8
+  - Led rojo  → 9  
+
 
   ============================================
 */
@@ -48,6 +53,8 @@ Servo servomotor;
 // Pines ultrasónico
 const int pinTrigger = A1;
 const int pinEcho = A0;
+const int ledCerrado = 8;
+const int ledAbierto = 9;
 
 // Variables de medición
 float duracionPulsoUltrasonico, distanciaMedida;
@@ -71,6 +78,9 @@ const int distanciaCerrar = 40;
 void setup() {
   pinMode(pinTrigger, OUTPUT);
   pinMode(pinEcho, INPUT);
+  pinMode(8, OUTPUT);
+  pinMode(8, OUTPUT);
+
   Serial.begin(9600);
 
   delay(2000);
@@ -126,6 +136,8 @@ void abrirPluma() {
   servomotor.write(0);
   delay(700);
   servomotor.detach();
+  digitalWrite(ledAbierto,HIGH);
+  digitalWrite(ledCerrado,LOW);
 }
 
 void cerrarPluma() {
@@ -133,4 +145,6 @@ void cerrarPluma() {
   servomotor.write(90);
   delay(700);
   servomotor.detach();
+  digitalWrite(ledAbierto,LOW);
+  digitalWrite(ledCerrado,HIGH);
 }
